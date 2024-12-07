@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LottieFiles Previewer</title>
+
+    <!-- Lottie Player Library -->
+    <script src="https://unpkg.com/@lottiefiles/lottie-player@latest/dist/lottie-player.js"></script>
+
+    <!-- Simple CSS Reset and Layout Styles -->
+    <style>
+        /* CSS Reset */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        header {
+            background-color: #4CAF50;
+            color: white;
+            padding: 1rem;
+            text-align: center;
+        }
+
+        .container {
+            flex: 1;
+            display: flex;
+            padding: 1rem;
+            width: 100vw;
+            margin: auto;
+            flex-wrap: wrap;
+        }
+
+        /* Left Panel (Larger) */
+        .preview-section {
+            flex: 7;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            padding: 1rem;
+        }
+
+        /* Lottie Animation Container */
+        .animation-container {
+            width: 50vw;
+            /* Set the width to 50% of the screen width */
+            height: 50vh;
+            /* Set the height to 50% of the screen height */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+
+        .lottie-player {
+            width: 100%;
+        }
+
+        .animation-container p {
+            color: #777;
+            position: absolute;
+            font-size: 1.2rem;
+            z-index: 1;
+        }
+
+        /* Right Panel (Smaller) */
+        .uploader {
+            flex: 3;
+            background-color: white;
+            padding: 1rem;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 400px;
+            /* Set max-width to control panel size */
+            margin: 0 0 0 1rem;
+            /* Add margin between panels */
+        }
+
+        .uploader h2 {
+            margin-bottom: 0.5rem;
+        }
+
+        .uploader input[type="file"],
+        .uploader input[type="text"] {
+            width: 100%;
+            padding: 0.5rem;
+            margin: 0.5rem 0;
+            border: 1px solid #ccc;
+            border-radius: 3px;
+        }
+
+        .uploader button {
+            padding: 0.5rem 1rem;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 3px;
+            cursor: pointer;
+            width: 100%;
+        }
+
+        .uploader button:hover {
+            background-color: #45a049;
+        }
+
+        /* Error Message Styles */
+        .error-message {
+            color: red;
+            text-align: center;
+            margin-top: 0.5rem;
+        }
+
+        /* Placeholder Message */
+        .placeholderMessage {
+            text-align: center;
+            font-size: 1.2rem;
+            color: #777;
+        }
+
+        /* Responsive Styles */
+        @media (max-width: 768px) {
+            .container {
+                flex-direction: column;
+            }
+
+            .preview-section,
+            .uploader {
+                flex: 1 1 auto;
+                margin-bottom: 1rem;
+            }
+
+            .uploader {
+                max-width: none;
+            }
+        }
+
+        /* Color Palette */
+        .color-palette {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 1rem;
+        }
+
+        /* Color Buttons - Circular */
+        .color-button {
+            width: 40px;
+            /* Make the buttons larger */
+            height: 40px;
+            /* Equal width and height for circle */
+            border: none;
+            border-radius: 50%;
+            /* Makes the button circular */
+            cursor: pointer;
+            transition: opacity 0.3s ease;
+            /* Smooth hover effect */
+            display: inline-block;
+            /* Ensure the width and height are respected */
+            background-color: #ccc;
+            /* Default background color */
+        }
+
+        /* Optional: Hover effect to enhance user interaction */
+        .color-button:hover {
+            opacity: 0.8;
+        }
+    </style>
+</head>
+
+<body>
+
+    <header>
+        <h1>LottieFiles Previewer</h1>
+    </header>
+
+    <div class="container">
+        <!-- Left Panel (Preview Section) -->
+        <div class="preview-section">
+            <div class="animation-container" id="animationContainer">
+
+                <!-- Placeholder Message -->
+                <p id="placeholderMessage" class="placeholderMessage">Select or enter a Lottie animation</p>
+                <!-- Lottie Animation will be rendered here -->
+            </div>
+        </div>
+
+        <!-- Right Panel (Uploader Section) -->
+        <div class="uploader">
+            <h2>Upload Lottie Animation</h2>
+            <input type="file" id="fileInput" accept=".json">
+            <p style="text-align: center;">OR</p>
+            <input type="text" id="urlInput" placeholder="Enter Lottie JSON URL">
+            <button id="loadButton">Load Animation</button>
+
+            <p style="margin-top: 20px;">Choose Background Color</p>
+            <div class="color-palette">
+                <button onclick="resetBackgroundColor()"
+                    style="background-color: transparent; border-radius: 40px; width: 40px; height: 40px; cursor: pointer; transition: opacity 0.3s ease;
+                    background-image: url(http://www.transparenttextures.com/patterns/3px-tile.png);background-size: 10% 10%;"></button>
+
+                <button class="color-button"
+                    style="background-color: #f44336;border-radius: 40px; width: 40px; height: 40px; cursor: pointer; transition: opacity 0.3s ease;"></button>
+                <button class="color-button"
+                    style="background-color: #2196F3; border-radius: 40px; width: 40px; height: 40px; cursor: pointer; transition: opacity 0.3s ease;"></button>
+                <button class="color-button"
+                    style="background-color: #4CAF50; border-radius: 40px; width: 40px; height: 40px; cursor: pointer; transition: opacity 0.3s ease;"></button>
+                <button class="color-button"
+                    style="background-color: #FFEB3B; border-radius: 40px; width: 40px; height: 40px; cursor: pointer; transition: opacity 0.3s ease;"></button>
+                <button class="color-button"
+                    style="background-color: #9C27B0; border-radius: 40px; width: 40px; height: 40px; cursor: pointer; transition: opacity 0.3s ease;"></button>
+                <button class="color-button"
+                    style="background-color: #36f49b;border-radius: 40px; width: 40px; height: 40px; cursor: pointer; transition: opacity 0.3s ease;"></button>
+
+                <button class="color-button"
+                    style="background-color: #af844c; border-radius: 40px; width: 40px; height: 40px; cursor: pointer; transition: opacity 0.3s ease;"></button>
+                <button class="color-button"
+                    style="background-color: #000000; border-radius: 40px; width: 40px; height: 40px; cursor: pointer; transition: opacity 0.3s ease;"></button>
+
+            </div>
+            <input style="margin-top: 20px;" type="text" id="hexColorInput"
+                placeholder="Enter Hex Code (with or without #)">
+            <div class="error-message" id="hexErrorMessage"></div>
+            <button onclick="applyBackgroundColor()">Apply Color</button>
+            <div class="error-message" id="errorMessage"></div>
+        </div>
+    </div>
+
+    <!-- JavaScript Functionality -->
+    <script>
+        // Elements
+        const fileInput = document.getElementById('fileInput');
+        const urlInput = document.getElementById('urlInput');
+        const loadButton = document.getElementById('loadButton');
+        const animationContainer = document.getElementById('animationContainer');
+        const errorMessage = document.getElementById('errorMessage');
+        const placeholderMessage = document.getElementById('placeholderMessage');
+        const hexErrorMessage = document.getElementById('hexErrorMessage');
+
+        let currentPlayer = null;
+
+
+        // Color Buttons
+        const colorButtons = document.querySelectorAll('.color-button');
+
+        // Add event listeners to each color button
+        colorButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                const color = button.style.backgroundColor;
+                animationContainer.style.backgroundColor = color; // Change background color of animation container
+            });
+        });
+
+        // Function to reset background color to none (transparent)
+        function resetBackgroundColor() {
+            animationContainer.style.backgroundColor = 'transparent'; // or 'none' based on preference
+        }
+
+        // Function to handle hex input color application
+        function applyBackgroundColor() {
+            const hexInput = document.getElementById('hexColorInput').value.trim();
+
+            // Validate hex code (with or without '#')
+            const hexPattern = /^#?([0-9A-Fa-f]{6}|[0-9A-Fa-f]{3})$/;
+
+            if (hexPattern.test(hexInput)) {
+                const validHex = hexInput.startsWith('#') ? hexInput : '#' + hexInput;
+                animationContainer.style.backgroundColor = validHex;
+                hexErrorMessage.textContent = '';  // Clear previous error message
+            } else {
+                hexErrorMessage.textContent = 'Please enter a valid hex code.';
+            }
+        }
+
+        // Function to load animation from file input
+        fileInput.addEventListener('change', function () {
+            const file = fileInput.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function (event) {
+                    loadAnimation(event.target.result);
+                };
+                reader.readAsText(file);
+            }
+        });
+
+        // Function to load animation from URL input
+        loadButton.addEventListener('click', function () {
+            const url = urlInput.value.trim();
+            if (url && url.endsWith('.json')) {
+                loadAnimation(url);
+            } else {
+                errorMessage.textContent = 'Please enter a valid Lottie JSON URL.';
+            }
+        });
+
+        // Function to load Lottie animation
+        function loadAnimation(data) {
+            if (currentPlayer) {
+                currentPlayer.remove(); // Remove previous animation player if any
+            }
+            currentPlayer = document.createElement('lottie-player');
+            currentPlayer.setAttribute('src', data);
+            currentPlayer.setAttribute('background', 'transparent');
+            currentPlayer.setAttribute('speed', '1');
+            currentPlayer.setAttribute('loop', true);
+            currentPlayer.setAttribute('autoplay', true);
+            currentPlayer.setAttribute('controls', true);
+            animationContainer.appendChild(currentPlayer);
+
+            // Hide placeholder message once animation is loaded
+            placeholderMessage.style.display = 'none';
+        }
+    </script>
+
+</body>
+
+</html>
